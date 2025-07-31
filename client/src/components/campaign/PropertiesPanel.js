@@ -1,5 +1,5 @@
 // src/components/campaign/PropertiesPanel.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Paper,
   Typography,
@@ -10,38 +10,48 @@ import {
   MenuItem,
   Button,
   Box,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const PropertiesPanel = ({ node, onNodeChange }) => {
-  if (!node) {
-    return (
-      <Paper className="properties-panel" elevation={3}>
-        <Typography variant="h6">Properties</Typography>
-        <Typography variant="body2">
-          Select a node to edit its properties
-        </Typography>
-      </Paper>
-    );
-  }
+  const [localNode, setLocalNode] = useState(node);
+
+  // Update localNode when node prop changes
+  useEffect(() => {
+    setLocalNode(node);
+  }, [node]);
 
   const handleChange = (field, value) => {
     // Create a deep copy of the node data
-    const updatedData = { ...node.data, [field]: value };
+    const updatedData = { ...localNode.data, [field]: value };
+    const updatedNode = { ...localNode, data: updatedData };
+
+    // Update local state immediately
+    setLocalNode(updatedNode);
+
+    // Propagate changes to parent
     onNodeChange(node.id, { data: updatedData });
+  };
+
+  const handleDeleteCondition = (index) => {
+    const newConditions = [...localNode.data.conditions];
+    newConditions.splice(index, 1);
+    handleChange("conditions", newConditions);
   };
 
   const renderEmailProperties = () => (
     <>
       <TextField
         label="Email Name"
-        value={node.data.name || ""}
+        value={localNode.data.name || ""}
         onChange={(e) => handleChange("name", e.target.value)}
         fullWidth
         margin="normal"
       />
       <TextField
         label="Subject"
-        value={node.data.subject || ""}
+        value={localNode.data.subject || ""}
         onChange={(e) => handleChange("subject", e.target.value)}
         fullWidth
         margin="normal"
@@ -49,7 +59,7 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
       <FormControl fullWidth margin="normal">
         <InputLabel>Template</InputLabel>
         <Select
-          value={node.data.template || ""}
+          value={localNode.data.template || ""}
           onChange={(e) => handleChange("template", e.target.value)}
         >
           <MenuItem value="welcome">Welcome Email</MenuItem>
@@ -64,7 +74,7 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
     <>
       <TextField
         label="Condition Name"
-        value={node.data.name || ""}
+        value={localNode.data.name || ""}
         onChange={(e) => handleChange("name", e.target.value)}
         fullWidth
         margin="normal"
@@ -74,14 +84,17 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
         Conditions
       </Typography>
 
-      {node.data.conditions?.map((condition, index) => (
-        <Box key={index} sx={{ display: "flex", gap: 2, mb: 2 }}>
+      {localNode.data.conditions?.map((condition, index) => (
+        <Box
+          key={index}
+          sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}
+        >
           <FormControl fullWidth>
             <InputLabel>Type</InputLabel>
             <Select
               value={condition.type || ""}
               onChange={(e) => {
-                const newConditions = [...node.data.conditions];
+                const newConditions = [...localNode.data.conditions];
                 newConditions[index] = {
                   ...newConditions[index],
                   type: e.target.value,
@@ -99,7 +112,7 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
             <Select
               value={condition.event || ""}
               onChange={(e) => {
-                const newConditions = [...node.data.conditions];
+                const newConditions = [...localNode.data.conditions];
                 newConditions[index] = {
                   ...newConditions[index],
                   event: e.target.value,
@@ -113,6 +126,14 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
               <MenuItem value="idle">No Activity</MenuItem>
             </Select>
           </FormControl>
+
+          <IconButton
+            onClick={() => handleDeleteCondition(index)}
+            color="error"
+            aria-label="delete condition"
+          >
+            <DeleteIcon />
+          </IconButton>
         </Box>
       ))}
 
@@ -120,7 +141,7 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
         variant="outlined"
         onClick={() => {
           const newConditions = [
-            ...(node.data.conditions || []),
+            ...(localNode.data.conditions || []),
             { type: "behavior", event: "open" },
           ];
           handleChange("conditions", newConditions);
@@ -135,14 +156,14 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
     <>
       <TextField
         label="Wait Name"
-        value={node.data.name || ""}
+        value={localNode.data.name || ""}
         onChange={(e) => handleChange("name", e.target.value)}
         fullWidth
         margin="normal"
       />
       <TextField
         label="Duration"
-        value={node.data.duration || ""}
+        value={localNode.data.duration || ""}
         onChange={(e) => handleChange("duration", e.target.value)}
         fullWidth
         margin="normal"
@@ -155,7 +176,7 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
     <>
       <TextField
         label="Action Name"
-        value={node.data.name || ""}
+        value={localNode.data.name || ""}
         onChange={(e) => handleChange("name", e.target.value)}
         fullWidth
         margin="normal"
@@ -163,7 +184,7 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
       <FormControl fullWidth margin="normal">
         <InputLabel>Action Type</InputLabel>
         <Select
-          value={node.data.actionType || ""}
+          value={localNode.data.actionType || ""}
           onChange={(e) => handleChange("actionType", e.target.value)}
         >
           <MenuItem value="tag">Add Tag</MenuItem>
@@ -174,14 +195,25 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
     </>
   );
 
+  if (!localNode) {
+    return (
+      <Paper className="properties-panel" elevation={3}>
+        <Typography variant="h6">Properties</Typography>
+        <Typography variant="body2">
+          Select a node to edit its properties
+        </Typography>
+      </Paper>
+    );
+  }
+
   return (
     <Paper className="properties-panel" elevation={3}>
       <Typography variant="h6">Properties</Typography>
 
-      {node.type === "email" && renderEmailProperties()}
-      {node.type === "condition" && renderConditionProperties()}
-      {node.type === "wait" && renderWaitProperties()}
-      {node.type === "action" && renderActionProperties()}
+      {localNode.type === "email" && renderEmailProperties()}
+      {localNode.type === "condition" && renderConditionProperties()}
+      {localNode.type === "wait" && renderWaitProperties()}
+      {localNode.type === "action" && renderActionProperties()}
     </Paper>
   );
 };

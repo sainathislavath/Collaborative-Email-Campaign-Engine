@@ -75,6 +75,18 @@ const CampaignBuilder = () => {
     setCurrentCampaign,
   ]);
 
+  // Update selectedNode when campaign changes
+  useEffect(() => {
+    if (currentCampaign && selectedNode) {
+      const updatedNode = currentCampaign.nodes.find(
+        (node) => node.id === selectedNode.id
+      );
+      if (updatedNode) {
+        setSelectedNode(updatedNode);
+      }
+    }
+  }, [currentCampaign, selectedNode]);
+
   const handleNodeChange = useCallback(
     (nodeId, updates) => {
       if (!currentCampaign) return;
@@ -101,28 +113,13 @@ const CampaignBuilder = () => {
       setCurrentCampaign(updatedCampaign);
       setIsDirty(true);
 
-      // Send real-time update
-      if (connected && user) {
-        updateCampaign(campaignId, updatedCampaign, user.id);
+      // Update the selected node if it's the one being changed
+      if (selectedNode && selectedNode.id === nodeId) {
+        const updatedSelectedNode = updatedNodes.find(
+          (node) => node.id === nodeId
+        );
+        setSelectedNode(updatedSelectedNode);
       }
-    },
-    [
-      currentCampaign,
-      setCurrentCampaign,
-      connected,
-      user,
-      campaignId,
-      updateCampaign,
-    ]
-  );
-
-  const handleEdgeChange = useCallback(
-    (updatedEdges) => {
-      if (!currentCampaign) return;
-
-      const updatedCampaign = { ...currentCampaign, edges: updatedEdges };
-      setCurrentCampaign(updatedCampaign);
-      setIsDirty(true);
 
       // Send real-time update
       if (connected && user) {
@@ -132,24 +129,12 @@ const CampaignBuilder = () => {
     [
       currentCampaign,
       setCurrentCampaign,
+      selectedNode,
       connected,
       user,
       campaignId,
       updateCampaign,
     ]
-  );
-
-  const handleCampaignChange = useCallback(
-    (updatedCampaign) => {
-      setCurrentCampaign(updatedCampaign);
-      setIsDirty(true);
-
-      // Send real-time update
-      if (connected && user) {
-        updateCampaign(id, updatedCampaign, user.id);
-      }
-    },
-    [currentCampaign, setCurrentCampaign, connected, user, id, updateCampaign]
   );
 
   const handleSave = async () => {
@@ -211,6 +196,19 @@ const CampaignBuilder = () => {
     ]
   );
 
+  const handleCampaignChange = useCallback(
+    (updatedCampaign) => {
+      setCurrentCampaign(updatedCampaign);
+      setIsDirty(true);
+
+      // Send real-time update
+      if (connected && user) {
+        updateCampaign(id, updatedCampaign, user.id);
+      }
+    },
+    [setCurrentCampaign, connected, user, id, updateCampaign]
+  );
+
   if (loading) return <div>Loading campaign...</div>;
   if (!currentCampaign) return <div>Campaign not found</div>;
 
@@ -231,7 +229,6 @@ const CampaignBuilder = () => {
           edges={currentCampaign.edges}
           onNodeSelect={handleNodeSelect}
           onNodeChange={handleNodeChange}
-          onEdgeChange={handleEdgeChange}
           onAddNode={handleAddNode}
         />
         <PropertiesPanel node={selectedNode} onNodeChange={handleNodeChange} />

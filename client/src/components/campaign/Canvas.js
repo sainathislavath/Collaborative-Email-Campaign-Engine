@@ -30,29 +30,11 @@ const Canvas = ({ nodes, edges, onNodeSelect, onNodeChange, onAddNode }) => {
   const [flowEdges, setFlowEdges] = useState(edges);
   const reactFlowWrapper = useRef(null);
 
-  // Handle ResizeObserver error
+  // Update flowNodes and flowEdges when props change
   useEffect(() => {
-    const originalError = window.onerror;
-
-    window.onerror = (message, source, lineno, colno, error) => {
-      if (
-        message ===
-        "ResizeObserver loop completed with undelivered notifications."
-      ) {
-        return false; // Suppress the error
-      }
-
-      if (originalError) {
-        return originalError(message, source, lineno, colno, error);
-      }
-
-      return false;
-    };
-
-    return () => {
-      window.onerror = originalError;
-    };
-  }, []);
+    setFlowNodes(nodes);
+    setFlowEdges(edges);
+  }, [nodes, edges]);
 
   const [{ isOver }, drop] = useDrop({
     accept: "node",
@@ -113,8 +95,8 @@ const Canvas = ({ nodes, edges, onNodeSelect, onNodeChange, onAddNode }) => {
         snapToGrid={true}
         snapGrid={[15, 15]}
         connectionMode="loose"
-        deleteKeyCode={46} // Delete key
-        onPaneClick={() => onNodeSelect(null)} // Deselect node when clicking on pane
+        deleteKeyCode={46}
+        onPaneClick={() => onNodeSelect(null)}
       >
         <Controls />
         <Background color="#aaa" gap={16} />
