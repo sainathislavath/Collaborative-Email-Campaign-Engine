@@ -74,7 +74,15 @@ router.put("/:id", auth, async (req, res) => {
 
     campaign = await Campaign.findByIdAndUpdate(
       req.params.id,
-      { $set: { name, description, nodes, edges, updatedAt: Date.now() } },
+      {
+        $set: {
+          name,
+          description,
+          nodes,
+          edges,
+          updatedAt: Date.now(),
+        },
+      },
       { new: true }
     );
 

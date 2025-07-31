@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 // import { useCampaign } from "../../contexts/CampaignContext";
 // import { useAuth } from "../../contexts/AuthContext";
@@ -11,15 +11,25 @@ import {
   Container,
   Fab,
   Box,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useCampaign } from "../../../contexts/CampaignContext";
 import { useAuth } from "../../../contexts/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { campaigns, loading, getCampaigns, addCampaign } = useCampaign();
+  const { campaigns, loading, getCampaigns, addCampaign, removeCampaign } =
+    useCampaign();
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState(null);
 
   useEffect(() => {
     getCampaigns();
@@ -39,6 +49,28 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error creating campaign:", error);
     }
+  };
+
+  const handleDeleteClick = (campaign) => {
+    setCampaignToDelete(campaign);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (campaignToDelete) {
+      try {
+        await removeCampaign(campaignToDelete._id);
+        setOpenDeleteDialog(false);
+        setCampaignToDelete(null);
+      } catch (error) {
+        console.error("Error deleting campaign:", error);
+      }
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+    setCampaignToDelete(null);
   };
 
   if (loading) return <div>Loading campaigns...</div>;
@@ -75,6 +107,7 @@ const Dashboard = () => {
                 sx={{
                   cursor: "pointer",
                   "&:hover": { boxShadow: 6 },
+                  position: "relative",
                 }}
                 onClick={() => navigate(`/campaign/${campaign._id}`)}
               >
@@ -89,6 +122,16 @@ const Dashboard = () => {
                     Created: {new Date(campaign.createdAt).toLocaleDateString()}
                   </Typography>
                 </CardContent>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteClick(campaign);
+                  }}
+                  color="error"
+                  sx={{ position: "absolute", top: 8, right: 8 }}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </Card>
             </Grid>
           ))}
@@ -103,6 +146,27 @@ const Dashboard = () => {
       >
         <AddIcon />
       </Fab>
+
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleDeleteCancel}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Delete Campaign</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete the campaign "
+            {campaignToDelete?.name}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

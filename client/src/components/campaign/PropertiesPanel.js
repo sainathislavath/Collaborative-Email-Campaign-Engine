@@ -1,3 +1,4 @@
+// src/components/campaign/PropertiesPanel.js
 import React from "react";
 import {
   Paper,
@@ -24,7 +25,9 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
   }
 
   const handleChange = (field, value) => {
-    onNodeChange(node.id, { [field]: value });
+    // Create a deep copy of the node data
+    const updatedData = { ...node.data, [field]: value };
+    onNodeChange(node.id, { data: updatedData });
   };
 
   const renderEmailProperties = () => (
@@ -128,12 +131,57 @@ const PropertiesPanel = ({ node, onNodeChange }) => {
     </>
   );
 
+  const renderWaitProperties = () => (
+    <>
+      <TextField
+        label="Wait Name"
+        value={node.data.name || ""}
+        onChange={(e) => handleChange("name", e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Duration"
+        value={node.data.duration || ""}
+        onChange={(e) => handleChange("duration", e.target.value)}
+        fullWidth
+        margin="normal"
+        helperText="e.g., 2d, 12h, 30m"
+      />
+    </>
+  );
+
+  const renderActionProperties = () => (
+    <>
+      <TextField
+        label="Action Name"
+        value={node.data.name || ""}
+        onChange={(e) => handleChange("name", e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Action Type</InputLabel>
+        <Select
+          value={node.data.actionType || ""}
+          onChange={(e) => handleChange("actionType", e.target.value)}
+        >
+          <MenuItem value="tag">Add Tag</MenuItem>
+          <MenuItem value="segment">Add to Segment</MenuItem>
+          <MenuItem value="webhook">Trigger Webhook</MenuItem>
+        </Select>
+      </FormControl>
+    </>
+  );
+
   return (
     <Paper className="properties-panel" elevation={3}>
       <Typography variant="h6">Properties</Typography>
 
       {node.type === "email" && renderEmailProperties()}
       {node.type === "condition" && renderConditionProperties()}
+      {node.type === "wait" && renderWaitProperties()}
+      {node.type === "action" && renderActionProperties()}
     </Paper>
   );
 };

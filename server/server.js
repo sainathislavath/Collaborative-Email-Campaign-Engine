@@ -23,8 +23,7 @@ app.use(express.json());
 // Database connection
 mongoose
   .connect(
-    process.env.MONGODB_URI ||
-      "mongodb://localhost:27017/email-campaign-engine",
+    process.env.MONGODB_URI,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,

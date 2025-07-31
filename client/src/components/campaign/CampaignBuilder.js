@@ -1,6 +1,6 @@
 // src/components/campaign/CampaignBuilder.js
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useCampaign } from "../../contexts/CampaignContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useWebSocket } from "../../contexts/WebSocketContext";
@@ -11,7 +11,7 @@ import CampaignHeader from "./CampaignHeader";
 
 const CampaignBuilder = () => {
   const { id } = useParams();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const {
     currentCampaign,
@@ -79,9 +79,23 @@ const CampaignBuilder = () => {
     (nodeId, updates) => {
       if (!currentCampaign) return;
 
-      const updatedNodes = currentCampaign.nodes.map((node) =>
-        node.id === nodeId ? { ...node, ...updates } : node
-      );
+      const updatedNodes = currentCampaign.nodes.map((node) => {
+        if (node.id === nodeId) {
+          // If we're updating the data, merge it with existing data
+          if (updates.data) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                ...updates.data,
+              },
+            };
+          }
+          // Otherwise, just apply the updates
+          return { ...node, ...updates };
+        }
+        return node;
+      });
 
       const updatedCampaign = { ...currentCampaign, nodes: updatedNodes };
       setCurrentCampaign(updatedCampaign);
@@ -100,6 +114,42 @@ const CampaignBuilder = () => {
       campaignId,
       updateCampaign,
     ]
+  );
+
+  const handleEdgeChange = useCallback(
+    (updatedEdges) => {
+      if (!currentCampaign) return;
+
+      const updatedCampaign = { ...currentCampaign, edges: updatedEdges };
+      setCurrentCampaign(updatedCampaign);
+      setIsDirty(true);
+
+      // Send real-time update
+      if (connected && user) {
+        updateCampaign(campaignId, updatedCampaign, user.id);
+      }
+    },
+    [
+      currentCampaign,
+      setCurrentCampaign,
+      connected,
+      user,
+      campaignId,
+      updateCampaign,
+    ]
+  );
+
+  const handleCampaignChange = useCallback(
+    (updatedCampaign) => {
+      setCurrentCampaign(updatedCampaign);
+      setIsDirty(true);
+
+      // Send real-time update
+      if (connected && user) {
+        updateCampaign(id, updatedCampaign, user.id);
+      }
+    },
+    [currentCampaign, setCurrentCampaign, connected, user, id, updateCampaign]
   );
 
   const handleSave = async () => {
@@ -171,6 +221,7 @@ const CampaignBuilder = () => {
         onSave={handleSave}
         isDirty={isDirty}
         collaborators={collaborators}
+        onCampaignChange={handleCampaignChange}
       />
 
       <div className="builder-container">
@@ -180,6 +231,7 @@ const CampaignBuilder = () => {
           edges={currentCampaign.edges}
           onNodeSelect={handleNodeSelect}
           onNodeChange={handleNodeChange}
+          onEdgeChange={handleEdgeChange}
           onAddNode={handleAddNode}
         />
         <PropertiesPanel node={selectedNode} onNodeChange={handleNodeChange} />
