@@ -1,6 +1,6 @@
 // src/components/campaign/CampaignBuilder.js
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useCampaign } from "../../contexts/CampaignContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useWebSocket } from "../../contexts/WebSocketContext";
@@ -11,6 +11,7 @@ import CampaignHeader from "./CampaignHeader";
 
 const CampaignBuilder = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const {
     currentCampaign,
@@ -136,6 +137,29 @@ const CampaignBuilder = () => {
     ]
   );
 
+  const handleEdgesChange = useCallback(
+    (edges) => {
+      if (!currentCampaign) return;
+
+      const updatedCampaign = { ...currentCampaign, edges };
+      setCurrentCampaign(updatedCampaign);
+      setIsDirty(true);
+
+      // Send real-time update
+      if (connected && user) {
+        updateCampaign(campaignId, updatedCampaign, user.id);
+      }
+    },
+    [
+      currentCampaign,
+      setCurrentCampaign,
+      connected,
+      user,
+      campaignId,
+      updateCampaign,
+    ]
+  );
+
   const handleSave = async () => {
     if (!currentCampaign) return;
 
@@ -229,6 +253,7 @@ const CampaignBuilder = () => {
           onNodeSelect={handleNodeSelect}
           onNodeChange={handleNodeChange}
           onAddNode={handleAddNode}
+          onEdgesChange={handleEdgesChange}
         />
         <PropertiesPanel node={selectedNode} onNodeChange={handleNodeChange} />
       </div>

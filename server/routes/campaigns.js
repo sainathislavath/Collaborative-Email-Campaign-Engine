@@ -72,7 +72,6 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // Use findByIdAndUpdate instead of findById and then save
     campaign = await Campaign.findByIdAndUpdate(
       req.params.id,
       {
@@ -84,7 +83,7 @@ router.put("/:id", auth, async (req, res) => {
           updatedAt: Date.now(),
         },
       },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     res.json(campaign);

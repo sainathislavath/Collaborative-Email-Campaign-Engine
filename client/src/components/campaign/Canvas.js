@@ -25,7 +25,14 @@ const nodeTypes = {
   action: ActionNode,
 };
 
-const Canvas = ({ nodes, edges, onNodeSelect, onNodeChange, onAddNode }) => {
+const Canvas = ({
+  nodes,
+  edges,
+  onNodeSelect,
+  onNodeChange,
+  onAddNode,
+  onEdgesChange,
+}) => {
   const [flowNodes, setFlowNodes] = useState(nodes);
   const [flowEdges, setFlowEdges] = useState(edges);
   const reactFlowWrapper = useRef(null);
@@ -59,13 +66,23 @@ const Canvas = ({ nodes, edges, onNodeSelect, onNodeChange, onAddNode }) => {
     setFlowNodes((nds) => applyNodeChanges(changes, nds));
   }, []);
 
-  const onEdgesChange = useCallback((changes) => {
-    setFlowEdges((eds) => applyEdgeChanges(changes, eds));
-  }, []);
+  const onEdgesChangeHandler = useCallback(
+    (changes) => {
+      const updatedEdges = applyEdgeChanges(changes, flowEdges);
+      setFlowEdges(updatedEdges);
+      onEdgesChange(updatedEdges);
+    },
+    [flowEdges, onEdgesChange]
+  );
 
-  const onConnect = useCallback((connection) => {
-    setFlowEdges((eds) => addEdge(connection, eds));
-  }, []);
+  const onConnect = useCallback(
+    (connection) => {
+      const newEdges = addEdge(connection, flowEdges);
+      setFlowEdges(newEdges);
+      onEdgesChange(newEdges);
+    },
+    [flowEdges, onEdgesChange]
+  );
 
   const onNodeClick = useCallback(
     (event, node) => {
@@ -84,7 +101,7 @@ const Canvas = ({ nodes, edges, onNodeSelect, onNodeChange, onAddNode }) => {
         nodes={flowNodes}
         edges={flowEdges}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onEdgesChange={onEdgesChangeHandler}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}

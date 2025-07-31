@@ -39,8 +39,16 @@ export const createCampaign = async (campaignData) => {
 };
 
 export const updateCampaign = async (id, campaignData) => {
-  const response = await axios.put(`${API_URL}/campaigns/${id}`, campaignData);
-  return response.data;
+  try {
+    const response = await axios.put(
+      `${API_URL}/campaigns/${id}`,
+      campaignData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating campaign:", error);
+    throw error;
+  }
 };
 
 export const deleteCampaign = async (id) => {
