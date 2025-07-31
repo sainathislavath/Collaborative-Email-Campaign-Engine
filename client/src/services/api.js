@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL =
+  process.env.REACT_APP_API_URL ||
+  "https://collaborative-email-campaign-engine.vercel.app/api";  // http://localhost:5000/api
 
 // Set auth token in headers
 const setAuthToken = (token) => {

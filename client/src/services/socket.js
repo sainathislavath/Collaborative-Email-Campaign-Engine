@@ -4,7 +4,10 @@ import io from "socket.io-client";
 let socket;
 
 export const initiateSocketConnection = () => {
-  socket = io(process.env.REACT_APP_SERVER_URL || "http://localhost:5000");
+  socket = io(
+    process.env.REACT_APP_SERVER_URL ||
+      "https://collaborative-email-campaign-engine.vercel.app/" // http://localhost:5000
+  );
   console.log("Connecting socket...");
   return socket;
 };
