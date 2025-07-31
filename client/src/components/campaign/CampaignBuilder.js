@@ -1,6 +1,6 @@
 // src/components/campaign/CampaignBuilder.js
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useCampaign } from "../../contexts/CampaignContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useWebSocket } from "../../contexts/WebSocketContext";
@@ -11,7 +11,6 @@ import CampaignHeader from "./CampaignHeader";
 
 const CampaignBuilder = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const {
     currentCampaign,

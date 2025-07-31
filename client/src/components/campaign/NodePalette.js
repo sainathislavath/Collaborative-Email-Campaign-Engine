@@ -1,3 +1,4 @@
+// src/components/campaign/NodePalette.js
 import React from "react";
 import { useDrag } from "react-dnd";
 import { Box, Paper, Typography, Button } from "@mui/material";

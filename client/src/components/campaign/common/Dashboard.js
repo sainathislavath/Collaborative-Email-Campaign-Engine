@@ -31,7 +31,6 @@ const Dashboard = () => {
   const {
     campaigns,
     loading,
-    error,
     getCampaigns,
     addCampaign,
     removeCampaign,
@@ -189,6 +188,7 @@ const Dashboard = () => {
         open={deleteSuccess}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert onClose={handleCloseSnackbar} severity="success">
           Campaign deleted successfully!

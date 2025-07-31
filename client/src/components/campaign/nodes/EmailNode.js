@@ -1,7 +1,7 @@
 // src/components/campaign/nodes/EmailNode.js
 import React from "react";
 import { Handle, Position } from "reactflow";
-import { Card, CardContent, Typography, IconButton } from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import MailIcon from "@mui/icons-material/Mail";
 
 const EmailNode = ({ data, selected }) => {

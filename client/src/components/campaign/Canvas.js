@@ -105,8 +105,10 @@ const Canvas = ({ nodes, edges, onNodeSelect, onNodeChange, onAddNode }) => {
   );
 };
 
-export default (props) => (
+const CanvasWithProvider = (props) => (
   <ReactFlowProvider>
     <Canvas {...props} />
   </ReactFlowProvider>
 );
+
+export default CanvasWithProvider;

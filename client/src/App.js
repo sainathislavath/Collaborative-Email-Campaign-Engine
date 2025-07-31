@@ -6,7 +6,10 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  ThemeProvider as MuiThemeProvider,
+  createTheme,
+} from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -21,6 +24,7 @@ import { WebSocketProvider } from "./contexts/WebSocketContext";
 import { CampaignProvider } from "./contexts/CampaignContext";
 import "./styles.css";
 import ErrorBoundary from "./components/campaign/common/ErrorBoundary";
+import { ThemeProvider, useThemeMode } from "./contexts/ThemeContext";
 
 const theme = createTheme({
   palette: {
@@ -36,6 +40,33 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <MuiThemedApp />
+    </ThemeProvider>
+  );
+}
+
+const MuiThemedApp = () => {
+  const { darkMode } = useThemeMode();
+  
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: darkMode ? 'dark' : 'light',
+          primary: {
+            main: "#4f46e5",
+          },
+          secondary: {
+            main: "#f50057",
+          },
+        },
+      }),
+    [darkMode]
+  );
+
+// function App() {
+  return (
+    <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <ErrorBoundary>
         <AuthProvider>
@@ -79,17 +110,17 @@ function App() {
           </DndProvider>
         </AuthProvider>
       </ErrorBoundary>
-    </ThemeProvider>
+    </MuiThemeProvider>
   );
 }
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-
+  
   if (loading) {
     return <div>Loading...</div>;
   }
-
+  
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
