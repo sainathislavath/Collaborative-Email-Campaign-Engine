@@ -28,10 +28,10 @@ const Navbar = () => {
               color="inherit"
               onClick={handleLogout}
               sx={{
-                backgroundColor: "red", // Change this color as needed
-                color: "#fff", // Ensure text is visible
+                backgroundColor: "red",
+                color: "#fff",
                 "&:hover": {
-                  backgroundColor: "#d32f2f", // Optional: a darker shade on hover
+                  backgroundColor: "#d32f2f",
                 },
               }}
             >
