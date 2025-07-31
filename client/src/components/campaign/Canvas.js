@@ -32,6 +32,7 @@ const Canvas = ({
   onNodeChange,
   onAddNode,
   onEdgesChange,
+  onNodesPositionChange,
 }) => {
   const [flowNodes, setFlowNodes] = useState(nodes);
   const [flowEdges, setFlowEdges] = useState(edges);
@@ -62,9 +63,22 @@ const Canvas = ({
 
   drop(reactFlowWrapper);
 
-  const onNodesChange = useCallback((changes) => {
-    setFlowNodes((nds) => applyNodeChanges(changes, nds));
-  }, []);
+  const onNodesChange = useCallback(
+    (changes) => {
+      const updatedNodes = applyNodeChanges(changes, flowNodes);
+      setFlowNodes(updatedNodes);
+
+      // Check if there are position changes
+      const positionChanges = changes.filter(
+        (change) => change.type === "position" && change.position
+      );
+
+      if (positionChanges.length > 0) {
+        onNodesPositionChange(updatedNodes);
+      }
+    },
+    [flowNodes, onNodesPositionChange]
+  );
 
   const onEdgesChangeHandler = useCallback(
     (changes) => {

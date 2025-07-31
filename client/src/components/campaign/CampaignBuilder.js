@@ -1,6 +1,6 @@
 // src/components/campaign/CampaignBuilder.js
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useCampaign } from "../../contexts/CampaignContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useWebSocket } from "../../contexts/WebSocketContext";
@@ -8,10 +8,10 @@ import Canvas from "./Canvas";
 import NodePalette from "./NodePalette";
 import PropertiesPanel from "./PropertiesPanel";
 import CampaignHeader from "./CampaignHeader";
+import { useDebounce } from "../../hooks/useDebounce";
 
 const CampaignBuilder = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const {
     currentCampaign,
@@ -160,6 +160,27 @@ const CampaignBuilder = () => {
     ]
   );
 
+  // Debounce the position change handler to prevent too many updates
+  const debouncedPositionChange = useDebounce((nodes) => {
+    if (!currentCampaign) return;
+
+    const updatedCampaign = { ...currentCampaign, nodes };
+    setCurrentCampaign(updatedCampaign);
+    setIsDirty(true);
+
+    // Send real-time update
+    if (connected && user) {
+      updateCampaign(campaignId, updatedCampaign, user.id);
+    }
+  }, 300);
+
+  const handleNodesPositionChange = useCallback(
+    (nodes) => {
+      debouncedPositionChange(nodes);
+    },
+    [debouncedPositionChange]
+  );
+
   const handleSave = async () => {
     if (!currentCampaign) return;
 
@@ -254,6 +275,7 @@ const CampaignBuilder = () => {
           onNodeChange={handleNodeChange}
           onAddNode={handleAddNode}
           onEdgesChange={handleEdgesChange}
+          onNodesPositionChange={handleNodesPositionChange}
         />
         <PropertiesPanel node={selectedNode} onNodeChange={handleNodeChange} />
       </div>
