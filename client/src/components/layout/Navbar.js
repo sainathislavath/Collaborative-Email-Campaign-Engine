@@ -22,9 +22,19 @@ const Navbar = () => {
         {isAuthenticated && (
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Typography variant="body1" sx={{ mr: 2 }}>
-              Welcome, {user?.name}
+              Welcome, {user?.name || "User"}
             </Typography>
-            <Button color="inherit" onClick={handleLogout}>
+            <Button
+              color="inherit"
+              onClick={handleLogout}
+              sx={{
+                backgroundColor: "red", // Change this color as needed
+                color: "#fff", // Ensure text is visible
+                "&:hover": {
+                  backgroundColor: "#d32f2f", // Optional: a darker shade on hover
+                },
+              }}
+            >
               Logout
             </Button>
           </Box>

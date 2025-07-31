@@ -1,7 +1,7 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+// src/contexts/AuthContext.js
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { loginUser, registerUser } from "../services/api";
 import setAuthToken from "../services/api";
-import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
@@ -20,11 +20,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+    const storedUser = localStorage.getItem("user");
+
+    if (token && storedUser) {
       setAuthToken(token);
-      const decoded = jwtDecode(token);
-      setUser(decoded);
-      setIsAuthenticated(true);
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Error parsing user data", error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
     }
     setLoading(false);
   }, []);
@@ -33,13 +41,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await loginUser(userData);
       const { token, user } = response;
+
+      // Store token and user in localStorage
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       setAuthToken(token);
       setUser(user);
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response.data.message };
+      return {
+        success: false,
+        error: error.response?.data?.message || "Login failed",
+      };
     }
   };
 
@@ -47,18 +62,26 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await registerUser(userData);
       const { token, user } = response;
+
+      // Store token and user in localStorage
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       setAuthToken(token);
       setUser(user);
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response.data.message };
+      return {
+        success: false,
+        error: error.response?.data?.message || "Registration failed",
+      };
     }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setAuthToken(false);
     setUser(null);
     setIsAuthenticated(false);

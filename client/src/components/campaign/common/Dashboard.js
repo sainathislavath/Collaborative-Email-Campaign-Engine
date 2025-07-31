@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { useCampaign } from "../../contexts/CampaignContext";
-// import { useAuth } from "../../contexts/AuthContext";
+import { useCampaign } from "../../../contexts/CampaignContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import {
   Button,
   Card,
@@ -22,8 +22,6 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useCampaign } from "../../../contexts/CampaignContext";
-import { useAuth } from "../../../contexts/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -95,7 +93,7 @@ const Dashboard = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h4" component="h1">
-          Welcome, {user?.name}
+          Welcome, {user?.name || "User"}
         </Typography>
         <Button variant="contained" onClick={handleCreateCampaign}>
           New Campaign
