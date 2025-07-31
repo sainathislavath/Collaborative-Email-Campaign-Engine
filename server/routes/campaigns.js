@@ -107,7 +107,8 @@ router.delete("/:id", auth, async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    await Campaign.findByIdAndRemove(req.params.id);
+    // Use findByIdAndDelete instead of findByIdAndRemove
+    await Campaign.findByIdAndDelete(req.params.id);
     res.json({ message: "Campaign removed" });
   } catch (error) {
     console.error(error);
