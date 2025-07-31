@@ -1,8 +1,9 @@
+// src/contexts/CampaignContext.js
 import React, {
   createContext,
   useContext,
   useReducer,
-  // useEffect,
+  useEffect,
   useCallback,
 } from "react";
 import {
@@ -36,7 +37,7 @@ const campaignReducer = (state, action) => {
         ...state,
         currentCampaign: action.payload,
         campaigns: state.campaigns.map((c) =>
-          c.id === action.payload.id ? action.payload : c
+          c._id === action.payload._id ? action.payload : c
         ),
       };
     case "ADD_CAMPAIGN":
@@ -48,7 +49,7 @@ const campaignReducer = (state, action) => {
     case "DELETE_CAMPAIGN":
       return {
         ...state,
-        campaigns: state.campaigns.filter((c) => c.id !== action.payload),
+        campaigns: state.campaigns.filter((c) => c._id !== action.payload),
         loading: false,
       };
     default:
@@ -110,6 +111,7 @@ export const CampaignProvider = ({ children }) => {
       dispatch({ type: "DELETE_CAMPAIGN", payload: id });
     } catch (error) {
       dispatch({ type: "SET_ERROR", payload: error.message });
+      throw error;
     }
   }, []);
 

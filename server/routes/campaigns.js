@@ -72,6 +72,7 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
+    // Use findByIdAndUpdate instead of findById and then save
     campaign = await Campaign.findByIdAndUpdate(
       req.params.id,
       {
@@ -83,7 +84,7 @@ router.put("/:id", auth, async (req, res) => {
           updatedAt: Date.now(),
         },
       },
-      { new: true }
+      { new: true } // Return the updated document
     );
 
     res.json(campaign);
@@ -107,9 +108,8 @@ router.delete("/:id", auth, async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // Use findByIdAndDelete instead of findByIdAndRemove
     await Campaign.findByIdAndDelete(req.params.id);
-    res.json({ message: "Campaign removed" });
+    res.json({ message: "Campaign removed successfully", id: req.params.id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

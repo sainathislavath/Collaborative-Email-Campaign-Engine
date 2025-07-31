@@ -17,6 +17,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -26,10 +28,17 @@ import { useAuth } from "../../../contexts/AuthContext";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { campaigns, loading, getCampaigns, addCampaign, removeCampaign } =
-    useCampaign();
+  const {
+    campaigns,
+    loading,
+    error,
+    getCampaigns,
+    addCampaign,
+    removeCampaign,
+  } = useCampaign();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState(null);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   useEffect(() => {
     getCampaigns();
@@ -62,6 +71,10 @@ const Dashboard = () => {
         await removeCampaign(campaignToDelete._id);
         setOpenDeleteDialog(false);
         setCampaignToDelete(null);
+        setDeleteSuccess(true);
+
+        // Refresh the campaign list after deletion
+        getCampaigns();
       } catch (error) {
         console.error("Error deleting campaign:", error);
       }
@@ -71,6 +84,10 @@ const Dashboard = () => {
   const handleDeleteCancel = () => {
     setOpenDeleteDialog(false);
     setCampaignToDelete(null);
+  };
+
+  const handleCloseSnackbar = () => {
+    setDeleteSuccess(false);
   };
 
   if (loading) return <div>Loading campaigns...</div>;
@@ -167,6 +184,16 @@ const Dashboard = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={deleteSuccess}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success">
+          Campaign deleted successfully!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

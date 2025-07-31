@@ -44,8 +44,13 @@ export const updateCampaign = async (id, campaignData) => {
 };
 
 export const deleteCampaign = async (id) => {
-  const response = await axios.delete(`${API_URL}/campaigns/${id}`);
-  return response.data;
+  try {
+    const response = await axios.delete(`${API_URL}/campaigns/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting campaign:", error);
+    throw error;
+  }
 };
 
 export default setAuthToken;
