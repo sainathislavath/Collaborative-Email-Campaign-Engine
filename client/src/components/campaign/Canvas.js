@@ -11,12 +11,12 @@ import ReactFlow, {
   // Connection,
   ReactFlowProvider,
 } from "reactflow";
+import { useDrop } from "react-dnd";
 import "reactflow/dist/style.css";
 import EmailNode from "./nodes/EmailNode";
 import WaitNode from "./nodes/WaitNode";
 import ConditionNode from "./nodes/ConditionNode";
 import ActionNode from "./nodes/ActionNode";
-import { useDrop } from "react-dnd";
 
 const nodeTypes = {
   email: EmailNode,
